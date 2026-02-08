@@ -3,137 +3,177 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>La Liga Élite de Costos - Jerarquía Dinámica</title>
+    <title>La Liga Élite de Costos - Ranking</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #eef2f5; color: #1f2937; }
-        .header-elite { background-color: #CC333F; background-image: linear-gradient(135deg, #CC333F 0%, #a82a34 100%); }
-        .glass-panel { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); border: 1px solid rgba(204, 51, 63, 0.1); }
-        .table-header-cell { font-size: 0.85rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; padding: 1.25rem; border-bottom: 3px solid rgba(0,0,0,0.1); color: #374151; }
-        .pos-number { color: #CC333F; font-weight: 900; font-style: italic; font-size: 1.5rem; }
-        .tier-badge { padding: 4px 12px; border-radius: 6px; font-size: 0.7rem; font-weight: 900; text-transform: uppercase; display: inline-flex; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .tier-bronce { background: #cd7f32; color: white; }
-        .tier-plata { background: #9ca3af; color: white; }
-        .tier-oro { background: #fbbf24; color: #451a03; }
-        .tier-platino { background: #e5e7eb; color: #1f2937; border: 1px solid #9ca3af; }
-        .tier-diamante { background: #0891b2; color: white; }
+        .header-elite { background-color: #CC333F; background-image: linear-gradient(135deg, #CC333F 0%, #a82a34 100%); box-shadow: 0 4px 15px rgba(204, 51, 63, 0.3); }
+        .footer-panel-elite { background-color: #CC333F; background-image: linear-gradient(135deg, #CC333F 0%, #a82a34 100%); }
+        .glass-panel { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); border: 1px solid rgba(204, 51, 63, 0.1); box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05); }
+        .table-header-cell { font-size: 1rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.08em; padding: 1.75rem 1.5rem; border-bottom: 3px solid rgba(0,0,0,0.15); color: #000000 !important; line-height: 1.2; }
+        .pos-number { color: #CC333F !important; font-weight: 900; font-style: italic; font-size: 1.5rem; }
+        .tier-badge { padding: 2px 10px; border-radius: 4px; font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; display: inline-flex; align-items: center; }
+        .tier-bronce { background: linear-gradient(145deg, #cd7f32, #b87333); }
+        .tier-plata { background: linear-gradient(145deg, #e5e7eb, #9ca3af); }
+        .tier-oro { background: linear-gradient(145deg, #fbbf24, #f59e0b); }
+        .tier-platino { background: linear-gradient(145deg, #f3f4f6, #d1d5db); }
+        .tier-diamante { background: linear-gradient(145deg, #67e8f9, #0891b2); }
         .tier-unranked { background: #d1d5db; color: #4b5563; }
-        .progress-bar-bg { background: #e5e7eb; height: 12px; border-radius: 10px; overflow: hidden; width: 100%; border: 1px solid rgba(0,0,0,0.05); }
-        .progress-fill-3d { height: 100%; border-radius: 10px; background: #CC333F; transition: width 1s cubic-bezier(0.34, 1.56, 0.64, 1); }
-        .valor-numerico { font-size: 1.4rem; font-weight: 800; color: #111827; }
+        .progress-bar-bg { background: #d1d5db; height: 16px; border-radius: 50px; overflow: hidden; width: 100%; box-shadow: inset 0 2px 4px rgba(0,0,0,0.15); border: 1px solid rgba(0,0,0,0.05); }
+        .progress-fill-3d { height: 100%; border-radius: 50px; background-color: #CC333F; background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0) 50%, rgba(0, 0, 0, 0.2) 100%); box-shadow: 0 2px 4px rgba(204, 51, 63, 0.4), inset 0 -1px 2px rgba(0,0,0,0.3); position: relative; transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
+        .fuente-estandar { font-size: 1rem; font-weight: 700; line-height: 1.25; }
+        .nombre-miembro { color: #111827; margin-bottom: 0.25rem; }
+        .label-info-secundaria { font-size: 11px; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; }
+        .valor-numerico { font-size: 1.5rem; font-weight: 600; color: #1f2937; line-height: 1; }
+        .valor-fraccion { font-size: 1.4rem; font-weight: 700; color: #1f2937; }
+        .valor-fraccion .denominador { font-size: 1rem; color: #6b7280; font-weight: 500; }
     </style>
 </head>
-<body class="p-4 md:p-10">
-
+<body class="p-4 md:p-12 min-h-screen">
     <div class="max-w-7xl mx-auto">
-        <header class="mb-8 flex flex-col md:flex-row justify-between items-center header-elite rounded-3xl p-8 gap-6 text-white shadow-xl">
-            <div>
-                <h1 class="text-3xl md:text-5xl font-black italic tracking-tighter">LA LIGA <span class="opacity-80">ÉLITE</span></h1>
-                <p class="text-xs font-bold uppercase tracking-widest mt-1">Sistema de Progresión de Costos</p>
+        <header class="mb-10 flex flex-col md:flex-row justify-between items-center header-elite rounded-2xl p-8 gap-6 text-white">
+            <div class="text-center md:text-left">
+                <h1 class="text-3xl md:text-4xl lg:text-5xl font-black italic tracking-tighter">
+                    LA LIGA <span class="text-white/80 underline decoration-white/30 italic">ÉLITE</span> DE COSTOS
+                </h1>
+                <p class="text-white mt-2 font-bold tracking-wide uppercase text-xs">Tabla de Jerarquía | Feb 2026</p>
             </div>
-            <div class="bg-black/20 p-4 rounded-2xl border border-white/10 text-sm font-medium">
-                La barra de progreso muestra cuánto te falta para el <span class="underline decoration-white/40">siguiente nivel</span>.
+            <div class="w-full md:w-auto">
+                <div class="bg-white/10 backdrop-blur-md p-4 rounded-xl border border-white/20 text-center">
+                    <p class="text-sm font-bold tracking-tight leading-relaxed text-white">
+                        El PTM es tu calificación del mes.<br>
+                        El PTA define tu ascenso de Rango.
+                    </p>
+                </div>
             </div>
         </header>
 
-        <div class="glass-panel rounded-3xl overflow-hidden shadow-sm">
+        <div class="glass-panel rounded-2xl overflow-hidden border border-gray-200">
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>
-                        <tr class="bg-gray-50/50">
+                        <tr class="bg-gray-100 border-b border-gray-200">
                             <th class="table-header-cell">Pos.</th>
-                            <th class="table-header-cell">Miembro / Rango Actual</th>
-                            <th class="table-header-cell text-center">PTM</th>
-                            <th class="table-header-cell text-center">PTA Total</th>
-                            <th class="table-header-cell min-w-[300px]">Progreso al Siguiente Rango</th>
+                            <th class="table-header-cell">Miembro / Jerarquía</th>
+                            <th class="table-header-cell text-center bg-gray-50">PTM (Nota)</th>
+                            <th class="table-header-cell text-center bg-gray-200/50">PTA Total</th>
+                            <th class="table-header-cell min-w-[320px]">Progreso de Rango</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-100" id="ranking-body"></tbody>
+                    <tbody class="divide-y divide-gray-200">
+                        <script>
+                            const jerarquias = [
+                                { nombre: 'BRONCE', sub: 'Aprendiz', min: 100 },
+                                { nombre: 'PLATA', sub: 'Básico', min: 300 },
+                                { nombre: 'ORO', sub: 'Intermedio', min: 700 },
+                                { nombre: 'PLATINO', sub: 'Avanzado', min: 1100 },
+                                { nombre: 'DIAMANTE', sub: 'Experto', min: 1600 }
+                            ];
+
+                            const miembros = [
+                                { nombre: "Raúl Simosa", ptm: 100, ptaPrevio: 18 },
+                                { nombre: "Dulmary López", ptm: 96, ptaPrevio: 20 },
+                                { nombre: "Lervin Loyo", ptm: 100, ptaPrevio: 0 },
+                                { nombre: "Glenda Laguna", ptm: 92, ptaPrevio: 0 },
+                                { nombre: "Pablo Ramos", ptm: 92, ptaPrevio: 0 },
+                                { nombre: "Oswaldo Acosta", ptm: 76, ptaPrevio: 0 },
+                                { nombre: "Yesenia Hernández", ptm: 64, ptaPrevio: 0 },
+                                { nombre: "Yecenia Hernandez", ptm: 64, ptaPrevio: 0 },
+                                { nombre: "Tahyrí Coéllar", ptm: 56, ptaPrevio: 0 },
+                                { nombre: "Joselyn Salas", ptm: 40, ptaPrevio: 9 },
+                                { nombre: "Ailed Mota", ptm: 0, ptaPrevio: 19 },
+                                { nombre: "Beatriz Urbina", ptm: 0, ptaPrevio: 16 },
+                                { nombre: "Joswald Herrera", ptm: 0, ptaPrevio: 13 },
+                                { nombre: "Lesvia Ariza", ptm: 0, ptaPrevio: 10 }
+                            ].sort((a, b) => (b.ptm + b.ptaPrevio) - (a.ptm + a.ptaPrevio));
+
+                            function getTierInfo(pts) {
+                                let current = { nombre: 'ASPIRANTE', sub: 'Iniciando', class: 'tier-unranked', min: 0, next: 100 };
+                                for (let j of jerarquias) {
+                                    if (pts >= j.min) {
+                                        let nextJ = jerarquias[jerarquias.indexOf(j) + 1];
+                                        current = { ...j, class: `tier-${j.nombre.toLowerCase()}`, next: nextJ ? nextJ.min : null };
+                                    }
+                                }
+                                return current;
+                            }
+
+                            document.write(miembros.map((m, idx) => {
+                                const ptaTotal = m.ptm + m.ptaPrevio;
+                                const tier = getTierInfo(ptaTotal);
+                                
+                                // LÓGICA DE PROGRESO POR ESCALAFÓN:
+                                let progreso = 0;
+                                if (tier.next) {
+                                    const rangoBase = tier.min;
+                                    const rangoSiguiente = tier.next;
+                                    progreso = ((ptaTotal - rangoBase) / (rangoSiguiente - rangoBase)) * 100;
+                                } else {
+                                    progreso = 100;
+                                }
+
+                                return `
+                                    <tr class="hover:bg-gray-50 transition-colors">
+                                        <td class="px-6 py-6 pos-number">${(idx + 1).toString().padStart(2, '0')}</td>
+                                        <td class="px-6 py-6 border-r border-gray-100">
+                                            <div class="fuente-estandar nombre-miembro">${m.nombre}</div>
+                                            <div class="flex items-center gap-2">
+                                                <span class="tier-badge ${tier.class} text-black font-black">${tier.nombre}</span>
+                                                <span class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">${tier.sub}</span>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-6 text-center bg-gray-50/30">
+                                            <div class="valor-fraccion">${m.ptm}<span class="denominador">/100</span></div>
+                                            <div class="label-info-secundaria mt-1">Nota Actual</div>
+                                        </td>
+                                        <td class="px-6 py-6 text-center bg-gray-50">
+                                            <div class="valor-numerico">${ptaTotal}</div>
+                                            <div class="label-info-secundaria mt-1">Acumulado Total</div>
+                                        </td>
+                                        <td class="px-6 py-6">
+                                            <div class="flex flex-col gap-3">
+                                                <div class="flex justify-between items-end">
+                                                    <span class="fuente-estandar progress-label-text">
+                                                        ${tier.next ? `Faltan ${tier.next - ptaTotal} para ${jerarquias.find(j => j.min === tier.next).nombre}` : 'NIVEL MÁXIMO'}
+                                                    </span>
+                                                    <span class="fuente-estandar progress-percent-text">${Math.round(progreso)}%</span>
+                                                </div>
+                                                <div class="progress-bar-bg">
+                                                    <div class="progress-fill-3d" style="width: ${progreso}%"></div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                `;
+                            }).join(''));
+                        </script>
+                    </tbody>
                 </table>
             </div>
         </div>
+
+        <div class="mt-12 footer-panel-elite p-4 rounded-2xl border border-white/10 shadow-2xl">
+            <h3 class="text-center text-white text-sm font-black uppercase tracking-widest mb-4">Requerimientos de Rango (PTA)</h3>
+            <div class="grid grid-cols-2 lg:grid-cols-5 gap-3">
+                <script>
+                    document.write(jerarquias.map(j => `
+                        <div class="flex flex-col items-center p-3 rounded-2xl bg-black/10 backdrop-blur-sm border border-white/5 group text-white">
+                            <span class="tier-badge bg-white text-black font-black mb-2 px-3 py-0.5 rounded shadow-lg transform group-hover:scale-110 transition-transform">
+                                ${j.nombre}
+                            </span>
+                            <div class="flex flex-col items-center">
+                                <span class="text-[9px] font-bold text-white uppercase tracking-widest">PTA MIN.</span>
+                                <span class="text-lg font-bold">${j.min}</span>
+                            </div>
+                        </div>
+                    `).join(''));
+                </script>
+            </div>
+        </div>
     </div>
-
-    <script>
-        const jerarquias = [
-            { nombre: 'ASPIRANTE', min: 0, next: 100, class: 'tier-unranked' },
-            { nombre: 'BRONCE', min: 100, next: 300, class: 'tier-bronce' },
-            { nombre: 'PLATA', min: 300, next: 700, class: 'tier-plata' },
-            { nombre: 'ORO', min: 700, next: 1100, class: 'tier-oro' },
-            { nombre: 'PLATINO', min: 1100, next: 1600, class: 'tier-platino' },
-            { nombre: 'DIAMANTE', min: 1600, next: null, class: 'tier-diamante' }
-        ];
-
-        const datos = [
-            { n: "Raúl Simosa", ptm: 100, ptaPrev: 18 },
-            { n: "Dulmary López", ptm: 96, ptaPrev: 20 },
-            { n: "Lervin Loyo", ptm: 100, ptaPrev: 0 },
-            { n: "Glenda Laguna", ptm: 92, ptaPrev: 0 },
-            { n: "Pablo Ramos", ptm: 92, ptaPrev: 0 },
-            { n: "Oswaldo Acosta", ptm: 76, ptaPrev: 0 },
-            { n: "Yesenia Hernández", ptm: 64, ptaPrev: 0 },
-            { n: "Yecenia Hernandez", ptm: 64, ptaPrev: 0 },
-            { n: "Tahyrí Coéllar", ptm: 56, ptaPrev: 0 },
-            { n: "Joselyn Salas", ptm: 40, ptaPrev: 9 },
-            { n: "Ailed Mota", ptm: 0, ptaPrev: 19 },
-            { n: "Beatriz Urbina", ptm: 0, ptaPrev: 16 },
-            { n: "Joswald Herrera", ptm: 0, ptaPrev: 13 },
-            { n: "Lesvia Ariza", ptm: 0, ptaPrev: 10 }
-        ];
-
-        const container = document.getElementById('ranking-body');
-
-        datos.sort((a,b) => (b.ptm + b.ptaPrev) - (a.ptm + a.ptaPrev)).forEach((m, i) => {
-            const total = m.ptm + m.ptaPrev;
-            
-            // Encontrar rango actual
-            let currentTier = jerarquias[0];
-            for (let j of jerarquias) {
-                if (total >= j.min) currentTier = j;
-            }
-
-            // CALCULO DE PROGRESO RELATIVO
-            let porcentaje = 0;
-            let faltanteTexto = "";
-
-            if (currentTier.next) {
-                const puntosEnEsteRango = total - currentTier.min;
-                const puntosNecesariosRango = currentTier.next - currentTier.min;
-                porcentaje = (puntosEnEsteRango / puntosNecesariosRango) * 100;
-                faltanteTexto = `Faltan ${currentTier.next - total} para el siguiente nivel`;
-            } else {
-                porcentaje = 100;
-                faltanteTexto = "NIVEL MÁXIMO ALCANZADO";
-            }
-
-            container.innerHTML += `
-                <tr class="hover:bg-blue-50/30 transition-all">
-                    <td class="px-6 py-5 pos-number">${(i+1).toString().padStart(2,'0')}</td>
-                    <td class="px-6 py-5">
-                        <div class="font-bold text-gray-900 text-lg">${m.n}</div>
-                        <span class="tier-badge ${currentTier.class}">${currentTier.nombre}</span>
-                    </td>
-                    <td class="px-6 py-5 text-center">
-                        <div class="text-sm font-bold ${m.ptm > 0 ? 'text-blue-600' : 'text-gray-300'}">
-                            ${m.ptm}<span class="text-[10px] text-gray-400">/100</span>
-                        </div>
-                    </td>
-                    <td class="px-6 py-5 text-center">
-                        <div class="valor-numerico">${total}</div>
-                    </td>
-                    <td class="px-6 py-5">
-                        <div class="flex justify-between text-[10px] font-black mb-1 text-gray-500 uppercase">
-                            <span>${faltanteTexto}</span>
-                            <span>${Math.round(porcentaje)}%</span>
-                        </div>
-                        <div class="progress-bar-bg">
-                            <div class="progress-fill-3d" style="width: ${porcentaje}%"></div>
-                        </div>
-                    </td>
-                </tr>
-            `;
-        });
-    </script>
+    <footer class="mt-12 text-center text-gray-400 text-[10px] font-bold uppercase tracking-[0.3em] pb-8">
+        &copy; 2026 La Liga Élite de Costos • Disciplina y Precisión
+    </footer>
 </body>
 </html>
